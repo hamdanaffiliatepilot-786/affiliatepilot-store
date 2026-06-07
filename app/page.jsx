@@ -1,19 +1,23 @@
+"use client"
+
+import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-export const revalidate = 3600; // Rozana update karega
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+);
 
-export default async function Home() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+export default function Home() {
+  const [products, setProducts] = useState([]);
 
-  let products = [];
-
-  // Agar keys hain tohi data nikalo, nahi toh khali dikhao
-  if (supabaseUrl && supabaseKey) {
-    const supabase = createClient(supabaseUrl, supabaseKey);
-    const { data } = await supabase.from('products').select('*');
-    products = data || [];
-  }
+  useEffect(() => {
+    async function loadData() {
+      const { data } = await supabase.from('products').select('*');
+      setProducts(data || []);
+    }
+    loadData();
+  }, []);
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900 font-sans">
@@ -35,7 +39,7 @@ export default async function Home() {
         <h2 className="text-3xl font-bold mb-8 text-center">🤖 PilotBot's Daily Finds</h2>
         
         {products.length === 0 ? (
-          <p className="text-center text-gray-500">No products found. Please add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel Environment Variables.</p>
+          <p className="text-center text-gray-500">Loading products from AI Agent...</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map(p => (
