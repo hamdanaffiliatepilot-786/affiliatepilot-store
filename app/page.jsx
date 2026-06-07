@@ -3,12 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 export const revalidate = 3600; // Rozana update karega
 
 export default async function Home() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const { data: products } = await supabase.from('products').select('*');
+  let products = [];
+
+  // Agar keys hain tohi data nikalo, nahi toh khali dikhao
+  if (supabaseUrl && supabaseKey) {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data } = await supabase.from('products').select('*');
+    products = data || [];
+  }
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900 font-sans">
@@ -28,21 +33,26 @@ export default async function Home() {
       {/* LIVE PRODUCT STORE */}
       <section id="store" className="max-w-7xl mx-auto p-6 mt-12">
         <h2 className="text-3xl font-bold mb-8 text-center">🤖 PilotBot's Daily Finds</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products?.map(p => (
-            <div key={p.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border ch">
-              <img src={p.image} alt={p.name} className="w-full h-48 object-cover" loading="lazy"/>
-              <div className="p-5">
-                <h3 className="font-bold text-sm mb-2 h-10">{p.name}</h3>
-                <p className="text-xs text-gray-500 mb-3">{p.description}</p>
-                <div className="flex justify-between items-center mt-4">
-                  <span className="text-xl font-extrabold text-blue-600">${p.price}</span>
-                  <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">Buy Now</button>
+        
+        {products.length === 0 ? (
+          <p className="text-center text-gray-500">No products found. Please add SUPABASE_URL and SUPABASE_ANON_KEY in Vercel Environment Variables.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map(p => (
+              <div key={p.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border ch">
+                <img src={p.image} alt={p.name} className="w-full h-48 object-cover" loading="lazy"/>
+                <div className="p-5">
+                  <h3 className="font-bold text-sm mb-2 h-10">{p.name}</h3>
+                  <p className="text-xs text-gray-500 mb-3">{p.description}</p>
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="text-xl font-extrabold text-blue-600">${p.price}</span>
+                    <button className="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-600 transition">Buy Now</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* LEGAL (AdSense Requirement) */}
