@@ -1,6 +1,8 @@
+import './globals.css';
+
 export const metadata = {
-  title: 'AffiliatePilot Global - AI Curated Deals',
-  description: 'Discover the best global deals curated by AI.',
+  title: 'AffiliatePilot Pro - AI Powered Global Store & Tools',
+  description: 'Curated by PilotBot. Auto-Shipped. Best Margins. Real-Time Tools.',
 }
 
 export default function RootLayout({ children }) {
